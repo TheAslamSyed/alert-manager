@@ -1,0 +1,91 @@
+{
+  "realm": "democorp",
+  "displayName": "DemoCorp Bank",
+  "enabled": true,
+  "sslRequired": "none",
+  "accessTokenLifespan": 1800,
+  "roles": {
+    "realm": [
+      { "name": "VIEWER", "description": "Read incidents and summaries" },
+      { "name": "RESPONDER", "description": "Investigate, propose fixes, draft messages" },
+      { "name": "APPROVER", "description": "Approve fixes and outgoing messages" },
+      { "name": "ADMIN", "description": "Manage settings; cannot approve fixes" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "warroom-ui",
+      "name": "War Room dashboard",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:5173/*", "http://localhost:3001/*"],
+      "webOrigins": ["http://localhost:5173", "http://localhost:3001"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/*##http://localhost:3001/*"
+      }
+    },
+    {
+      "clientId": "warroom-cli",
+      "name": "Scripts and API tests (password grant, local only)",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true
+    }
+  ],
+  "users": [
+    {
+      "username": "asha",
+      "firstName": "Asha",
+      "lastName": "Rao",
+      "email": "asha@democorp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "asha123", "temporary": false }],
+      "realmRoles": ["RESPONDER"]
+    },
+    {
+      "username": "priya",
+      "firstName": "Priya",
+      "lastName": "Nair",
+      "email": "priya@democorp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "priya123", "temporary": false }],
+      "realmRoles": ["APPROVER", "RESPONDER"]
+    },
+    {
+      "username": "meera",
+      "firstName": "Meera",
+      "lastName": "Iyer",
+      "email": "meera@democorp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "meera123", "temporary": false }],
+      "realmRoles": ["APPROVER", "RESPONDER"]
+    },
+    {
+      "username": "sarah",
+      "firstName": "Sarah",
+      "lastName": "Khan",
+      "email": "sarah@democorp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "sarah123", "temporary": false }],
+      "realmRoles": ["VIEWER"]
+    },
+    {
+      "username": "omar",
+      "firstName": "Omar",
+      "lastName": "Sheikh",
+      "email": "omar@democorp.test",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "omar123", "temporary": false }],
+      "realmRoles": ["ADMIN"]
+    }
+  ]
+}

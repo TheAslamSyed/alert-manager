@@ -1,0 +1,17 @@
+route:
+  receiver: warroom-ingestion
+  group_by: ["alertname", "service"]
+  group_wait: 5s
+  group_interval: 30s
+  repeat_interval: 1h
+
+receivers:
+  - name: warroom-ingestion
+    webhook_configs:
+      - url: http://ingestion-service:8081/ingest/alertmanager
+        send_resolved: true
+        http_config:
+          authorization:
+            type: Bearer
+            # Local development key; must match INGEST_API_KEY in docker-compose / infra/.env
+            credentials: dev-ingest-key

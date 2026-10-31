@@ -1,0 +1,120 @@
+# Alert rules for DemoCorp Bank. Alertmanager forwards firing alerts to ingestion-service.
+# Every alert carries a "service" label so the War Room can correlate it.
+groups:
+  - name: democorp-bank
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum by (service) (rate(democorp_requests_total{outcome="error"}[1m]))
+            / sum by (service) (rate(democorp_requests_total[1m])) > 0.10
+        for: 15s
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $value | humanizePercentage }} of requests on {{ $labels.service }} are failing."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, sum by (le, service) (rate(democorp_request_seconds_bucket[1m]))) > 1
+        for: 10s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow responses on {{ $labels.service }}"
+          description: "p95 latency on {{ $labels.service }} is {{ $value | humanizeDuration }}."
+
+      - alert: DbConnectionPoolSaturated
+        expr: max by (service) (democorp_db_pool_active / democorp_db_pool_max) > 0.9
+        for: 15s
+        labels:
+          severity: high
+        annotations:
+          summary: "Database connection pool almost full on {{ $labels.service }}"
+          description: "{{ $value | humanizePercentage }} of DB connections in use on {{ $labels.service }}."
+
+      - alert: CardNetworkErrors
+        expr: |
+          sum(rate(democorp_card_auth_total{outcome=~"error_.*"}[1m]))
+            / sum(rate(democorp_card_auth_total[1m])) > 0.20
+        for: 15s
+        labels:
+          severity: critical
+          service: payment-service
+        annotations:
+          summary: "Card authorizations failing"
+          description: "{{ $value | humanizePercentage }} of card authorizations end in an error."
+
+      - alert: ProcessorThrottling
+        expr: |
+          sum(rate(democorp_card_auth_total{outcome="throttled"}[1m]))
+            / sum(rate(democorp_card_auth_total[1m])) > 0.10
+        for: 15s
+        labels:
+          severity: high
+          service: payment-service
+        annotations:
+          summary: "Card processor is rate limiting us (HTTP 429)"
+          description: "{{ $value | humanizePercentage }} of card authorizations were throttled."
+
+      - alert: FraudDeclineSpike
+        expr: |
+          sum(rate(democorp_card_auth_total{outcome="declined_fraud"}[1m]))
+            / sum(rate(democorp_card_auth_total[1m])) > 0.20
+        for: 15s
+        labels:
+          severity: high
+          service: payment-service
+        annotations:
+          summary: "Unusually many payments declined by fraud rules"
+          description: "{{ $value | humanizePercentage }} of card payments are declined as fraud."
+
+      - alert: DuplicateDebits
+        expr: increase(democorp_duplicate_debits_total[1m]) > 0
+        for: 0s
+        labels:
+          severity: critical
+          service: payment-service
+        annotations:
+          summary: "Customers are being debited twice"
+          description: "{{ $value }} duplicate debits in the last minute."
+
+      - alert: LedgerBacklog
+        expr: max(democorp_ledger_queue_depth) > 50
+        for: 15s
+        labels:
+          severity: high
+          service: account-service
+        annotations:
+          summary: "Ledger postings are stuck"
+          description: "{{ $value }} ledger messages waiting; balances are not updating."
+
+      - alert: AccountCacheDown
+        expr: min(democorp_cache_up) == 0
+        for: 10s
+        labels:
+          severity: high
+          service: account-service
+        annotations:
+          summary: "Account cache is down"
+          description: "Balance reads are going straight to the database."
+
+      - alert: LoginFailureSpike
+        expr: sum(rate(democorp_login_attempts_total{outcome="failure"}[1m])) > 5
+        for: 15s
+        labels:
+          severity: high
+          service: banking-api
+        annotations:
+          summary: "Spike in failed logins"
+          description: "{{ $value | humanize }} failed logins per second."
+
+      - alert: PartnerApiUnusualVolume
+        expr: sum by (token) (rate(democorp_partner_api_records_total[1m])) > 50
+        for: 15s
+        labels:
+          severity: critical
+          service: banking-api
+        annotations:
+          summary: "Partner API token pulling unusual volume of account data"
+          description: "Token {{ $labels.token }} is reading {{ $value | humanize }} records per second."
