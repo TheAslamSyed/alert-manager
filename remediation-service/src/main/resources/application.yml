@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: remediation-service
+  config:
+    import: classpath:warroom-common.yml
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/warroom?currentSchema=remediation}
+    username: ${DB_USER:remediation}
+    password: ${DB_PASSWORD:remediation}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+server:
+  port: 8085
+
+warroom:
+  remediation:
+    democorp-url: ${DEMOCORP_URL:http://localhost:8090}
+    democorp-admin-key: ${DEMOCORP_ADMIN_KEY:dev-admin-key}
+    prometheus-url: ${PROMETHEUS_URL:http://localhost:9090}
+    # HMAC key that signs approved commands; the executor refuses anything without a valid signature
+    signing-key: ${APPROVAL_SIGNING_KEY:dev-approval-signing-key-change-me}
+    verify-timeout: 90s

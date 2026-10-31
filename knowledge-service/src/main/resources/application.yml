@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: knowledge-service
+  config:
+    import: classpath:warroom-common.yml
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/warroom?currentSchema=knowledge,public}
+    username: ${DB_USER:knowledge}
+    password: ${DB_PASSWORD:knowledge}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      embedding:
+        options:
+          model: nomic-embed-text
+      chat:
+        options:
+          model: qwen2.5:7b
+    vectorstore:
+      pgvector:
+        # Table is created by Flyway (V1) so the service needs no superuser rights.
+        initialize-schema: false
+        schema-name: knowledge
+        table-name: vector_store
+        dimensions: 768
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+
+server:
+  port: 8084
+
+warroom:
+  security:
+    # /internal/** is only reachable inside the Docker network (the gateway does not route it).
+    public-paths: ["/internal/**"]
