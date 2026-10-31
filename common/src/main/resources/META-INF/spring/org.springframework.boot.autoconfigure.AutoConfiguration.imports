@@ -1,0 +1,4 @@
+com.democorp.warroom.common.autoconfigure.WarroomCoreAutoConfiguration
+com.democorp.warroom.common.autoconfigure.WarroomKafkaAutoConfiguration
+com.democorp.warroom.common.autoconfigure.WarroomJdbcAutoConfiguration
+com.democorp.warroom.common.autoconfigure.WarroomSecurityAutoConfiguration

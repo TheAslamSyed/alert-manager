@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: agent-service
+  config:
+    import: classpath:warroom-common.yml
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/warroom?currentSchema=agent}
+    username: ${DB_USER:agent}
+    password: ${DB_PASSWORD:agent}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_MODEL:qwen2.5:7b}
+          temperature: 0.1
+          format: json
+          num-predict: 500
+          keep-alive: 30m
+      embedding:
+        options:
+          model: nomic-embed-text
+
+server:
+  port: 8083
+
+warroom:
+  agents:
+    prometheus-url: ${PROMETHEUS_URL:http://localhost:9090}
+    loki-url: ${LOKI_URL_QUERY:http://localhost:3100}
+    knowledge-url: ${KNOWLEDGE_URL:http://localhost:8084}
+    # Each evidence agent must answer within this time, or it is marked as a gap
+    agent-timeout: 60s
+    # One LLM answer on a CPU-only laptop can take a minute or two
+    llm-timeout: 180s
+    llm-enabled: ${AGENTS_LLM_ENABLED:true}
+    # How far back before the incident opened the agents look
+    lookback: 10m

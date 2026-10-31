@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: audit-service
+  config:
+    import: classpath:warroom-common.yml
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/warroom?currentSchema=audit}
+    username: ${DB_USER:audit}
+    password: ${DB_PASSWORD:audit}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+server:
+  port: 8086

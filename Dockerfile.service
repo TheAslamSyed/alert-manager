@@ -1,0 +1,19 @@
+# syntax=docker/dockerfile:1.7
+# One Dockerfile for every Spring Boot service. Build from the repo root:
+#   docker build -f Dockerfile.service --build-arg MODULE=incident-service .
+# Maven runs inside Docker (no local Java/Maven needed); ~/.m2 is cached between builds.
+
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /src
+COPY . .
+ARG MODULE
+RUN --mount=type=cache,target=/root/.m2 \
+    sh ./mvnw -B -q -DskipTests -pl "${MODULE}" -am package \
+    && cp "${MODULE}"/target/"${MODULE}"-*.jar /app.jar
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+RUN addgroup -S app && adduser -S app -G app
+COPY --from=build /app.jar /app/app.jar
+USER app
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

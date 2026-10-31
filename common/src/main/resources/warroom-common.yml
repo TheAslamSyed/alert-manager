@@ -1,0 +1,74 @@
+# Shared settings for every War Room service.
+# Import with:  spring.config.import: classpath:warroom-common.yml
+# Values here win over the importing file, so services only set keys NOT listed here
+# (environment variables still override everything).
+
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: ${spring.application.name}
+      auto-offset-reset: earliest
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Tokens are issued for the browser-facing URL; keys are fetched over the Docker network.
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/democorp}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:http://localhost:8180/realms/democorp/protocol/openid-connect/certs}
+  threads:
+    virtual:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+warroom:
+  loki:
+    url: ${LOKI_URL:http://localhost:3100/loki/api/v1/push}
+  catalog:
+    services:
+      - name: banking-api
+        team: Digital Banking
+        owner: priya
+        tier: 1
+        depends-on: [payment-service, account-service]
+      - name: payment-service
+        team: Payments
+        owner: priya
+        tier: 1
+        depends-on: [card-network, account-service]
+      - name: account-service
+        team: Accounts
+        owner: priya
+        tier: 1
+        depends-on: []
+      - name: card-network
+        team: External provider
+        owner: priya
+        tier: 2
+        depends-on: []

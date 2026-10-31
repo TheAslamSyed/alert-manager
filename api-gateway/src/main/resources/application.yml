@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: api-gateway
+  config:
+    import: classpath:warroom-common.yml
+  main:
+    web-application-type: reactive
+
+server:
+  port: 8080
+
+warroom:
+  gateway:
+    incident-url: ${INCIDENT_URL:http://localhost:8082}
+    remediation-url: ${REMEDIATION_URL:http://localhost:8085}
+    knowledge-url: ${KNOWLEDGE_URL:http://localhost:8084}
+    audit-url: ${AUDIT_URL:http://localhost:8086}
+    democorp-url: ${DEMOCORP_URL:http://localhost:8090}
+    # Vite dev server; the production UI is served by Nginx on the same origin
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173,http://localhost:3001}

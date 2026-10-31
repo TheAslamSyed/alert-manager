@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: democorp-bank
+  config:
+    import: classpath:warroom-common.yml
+
+server:
+  port: 8090
+
+democorp:
+  ingest-url: ${INGEST_URL:http://localhost:8081}
+  ingest-api-key: ${INGEST_API_KEY:dev-ingest-key}
+  admin-key: ${DEMOCORP_ADMIN_KEY:dev-admin-key}
+  # Background customer traffic so metrics and logs always flow
+  traffic-enabled: true
+  # Fallback: also post the alert straight to ingestion (if the Prometheus -> Alertmanager path is not running)
+  direct-alerts: ${DEMOCORP_DIRECT_ALERTS:false}
+  ticket-delay-seconds: 15
+  # Evaluation runner (MTTR report)
+  incident-url: ${INCIDENT_URL:http://localhost:8082}
+  knowledge-url: ${KNOWLEDGE_URL:http://localhost:8084}
+  eval-settle-seconds: 90
+  eval-timeout-seconds: 420
+  eval-approval-minutes: 2
+  eval-fix-minutes: 1

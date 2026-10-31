@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Shared logging: console everywhere; also ships logs to Loki when the "docker" profile is active. -->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="app"/>
+    <springProperty scope="context" name="lokiUrl" source="warroom.loki.url"
+                    defaultValue="http://localhost:3100/loki/api/v1/push"/>
+
+    <springProfile name="docker">
+        <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+            <labels>
+                app = ${appName}
+                level = %level
+            </labels>
+            <message>
+                <!-- logfmt, so LogQL can filter with: | logfmt | service="payment-service" -->
+                <pattern>level=%level app=${appName} traceId=%X{traceId:-none} logger=%logger{30} %msg %ex{short}</pattern>
+            </message>
+            <http>
+                <url>${lokiUrl}</url>
+            </http>
+            <batch>
+                <timeoutMs>2000</timeoutMs>
+            </batch>
+        </appender>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="LOKI"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="!docker">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>
